@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         SSO User Export
 // @namespace    https://sso.dwbn.org/
-// @version      2024-04-01
+// @version      2026-08-24
 // @description  Allow to export users from sso
 // @author       Andreas Schönefeldt
 // @match        https://sso.dwbn.org/accounts/*
+// @updateURL    https://github.com/Andreas-Schoenefeldt/tampermonkey-scripts/blob/main/sso.dwn.org.js
+// @downloadURL  https://github.com/Andreas-Schoenefeldt/tampermonkey-scripts/blob/main/sso.dwn.org.js
 // @icon         https://sso.dwbn.org/static/root/apple-touch-icon.fa7199afe17d.png
 // @grant        none
 // ==/UserScript==
