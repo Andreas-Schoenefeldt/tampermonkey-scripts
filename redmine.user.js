@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Redmine Improvements
 // @namespace    https://redmine.flowconcept.de/
-// @version      2026-08-31
+// @version      2026-09-17
 // @description  Add improvements for redmine for faster work
 // @author       Andreas Schönefeldt
 // @match        https://redmine.flowconcept.de/*
@@ -13,11 +13,16 @@
 
 (function (){
 
+  const fieldSetCurrentDate = (field) => field.value || new Date().toISOString().slice(0, 10);
+  const fieldSetStatus = (statusArray) => {
+    return (field) => statusArray.find(v => field.querySelector(`option[value="${v}"]`));
+  };
+
   const READY_FOR_REVIEW_ACTIONS = {
     '#issue_done_ratio': () => 100,
-    '#issue_start_date': (field) => field.value || new Date().toISOString().slice(0, 10),
+    '#issue_start_date': fieldSetCurrentDate,
     '#issue_assigned_to_id': (field, form) => form.querySelector('#issue_av_id')?.value,
-    '#issue_status_id': (field) => [11, 4, 2, 3].find(v => field.querySelector(`option[value="${v}"]`)),
+    '#issue_status_id': fieldSetStatus([11, 4, 2, 3]),
     '#issue_notes': (field) => field.value || 'Ist erledigt :)',
   };
 
@@ -26,11 +31,21 @@
       const myself = [...field.options].find(o => o.textContent.trim() === '<< ich >>');
       return myself?.value;
     },
-    '#issue_start_date': (field) => field.value || new Date().toISOString().slice(0, 10),
-    '#issue_status_id': (field) => [2, 4].find(v => field.querySelector(`option[value="${v}"]`)),
+    '#issue_start_date': fieldSetCurrentDate,
+    '#issue_status_id': fieldSetStatus([2, 4]),
   };
 
+  const NEED_FEEDBACK_ACTIONS = {
+    '#issue_assigned_to_id': (field, form) => form.querySelector('#issue_av_id')?.value,
+    '#issue_start_date': fieldSetCurrentDate,
+    '#issue_status_id': fieldSetStatus([4, 2]),
+  }
+
   const AV_STORAGE_KEY = 'redmine_av_value';
+
+  function getProject() {
+    return document.querySelector('.current-project').textContent.trim();
+  }
 
   function applyFieldActions(form, actions) {
     for (const [selector, resolve] of Object.entries(actions)) {
@@ -58,21 +73,31 @@
     select.id = 'issue_av_id';
     select.name = 'issue_av'; // not submitted as part of the issue form
 
-    const stored = localStorage.getItem(AV_STORAGE_KEY);
-    if (stored && select.querySelector(`option[value="${stored}"]`)) {
-      select.value = stored;
+    const project = getProject();
+    let stored = localStorage.getItem(AV_STORAGE_KEY);
+    try {
+      stored = JSON.parse(stored);
+    } catch (e) {
+      stored = {};
+    }
+
+    const av = stored[project] || '';
+
+    if (av && select.querySelector(`option[value="${av}"]`)) {
+      select.value = av;
     }
 
     select.addEventListener('change', () => {
-      localStorage.setItem(AV_STORAGE_KEY, select.value);
+      stored[project] = select.value;
+      localStorage.setItem(AV_STORAGE_KEY, JSON.stringify(av));
     });
 
     const wrapper = document.createElement('p');
     wrapper.title = 'Allgemein Verantwortlich';
     wrapper.append(label, select);
 
-    assignedTo.closest('p')?.insertAdjacentElement('beforebegin', wrapper)
-    ?? assignedTo.insertAdjacentElement('beforebegin', wrapper);
+    assignedTo.closest('p')?.insertAdjacentElement('afterend', wrapper)
+    ?? assignedTo.insertAdjacentElement('afterend', wrapper);
   }
 
   function injectActionButton(form, { id, label, actions }) {
@@ -102,6 +127,11 @@
         label: 'Start Progress',
         actions: START_PROGRESS_ACTIONS,
       });
+      injectActionButton(form, {
+        id: 'need-feedback-button',
+        label: 'Need Feedback',
+        actions: NEED_FEEDBACK_ACTIONS,
+      })
       injectAvSelect(form);
     }
   }
