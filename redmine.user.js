@@ -76,7 +76,7 @@
     const project = getProject();
     let stored = localStorage.getItem(AV_STORAGE_KEY);
     try {
-      stored = JSON.parse(stored);
+      stored = JSON.parse(stored) || {};
     } catch (e) {
       stored = {};
     }
@@ -89,7 +89,7 @@
 
     select.addEventListener('change', () => {
       stored[project] = select.value;
-      localStorage.setItem(AV_STORAGE_KEY, JSON.stringify(av));
+      localStorage.setItem(AV_STORAGE_KEY, JSON.stringify(stored));
     });
 
     const wrapper = document.createElement('p');
@@ -118,6 +118,11 @@
     const form = document.querySelector('form.edit_issue#issue-form');
     if (form) {
       injectActionButton(form, {
+        id: 'need-feedback-button',
+        label: 'Need Feedback',
+        actions: NEED_FEEDBACK_ACTIONS,
+      })
+      injectActionButton(form, {
         id: 'ready-for-review-btn',
         label: 'Ready for Review',
         actions: READY_FOR_REVIEW_ACTIONS,
@@ -127,11 +132,6 @@
         label: 'Start Progress',
         actions: START_PROGRESS_ACTIONS,
       });
-      injectActionButton(form, {
-        id: 'need-feedback-button',
-        label: 'Need Feedback',
-        actions: NEED_FEEDBACK_ACTIONS,
-      })
       injectAvSelect(form);
     }
   }
