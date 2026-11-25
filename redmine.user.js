@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Redmine Improvements
 // @namespace    https://redmine.flowconcept.de/
-// @version      2026-11-25
+// @version      1.0.3
 // @description  Add improvements for redmine for faster work
 // @author       Andreas Schönefeldt
 // @match        https://redmine.flowconcept.de/*
