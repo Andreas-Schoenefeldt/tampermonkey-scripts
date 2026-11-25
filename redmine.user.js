@@ -22,7 +22,7 @@
     '#issue_done_ratio': () => 100,
     '#issue_start_date': fieldSetCurrentDate,
     '#issue_assigned_to_id': (field, form) => form.querySelector('#issue_av_id')?.value,
-    '#issue_status_id': fieldSetStatus([11, 16, 4, 2, 3]),
+    '#issue_status_id': fieldSetStatus([11, 17, 4, 2, 3]),
     '#issue_notes': (field) => field.value || 'Ist erledigt :)',
   };
 
