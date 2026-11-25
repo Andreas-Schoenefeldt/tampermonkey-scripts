@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Redmine Improvements
 // @namespace    https://redmine.flowconcept.de/
-// @version      2026-09-17
+// @version      2026-11-23
 // @description  Add improvements for redmine for faster work
 // @author       Andreas Schönefeldt
 // @match        https://redmine.flowconcept.de/*
@@ -35,6 +35,16 @@
     '#issue_status_id': fieldSetStatus([2, 4]),
   };
 
+  const ASSIGN_TO_ME_ACTIONS = {
+    '#issue_assigned_to_id': (field) => {
+      const myself = [...field.options].find(o => o.textContent.trim() === '<< ich >>');
+      return myself?.value;
+    },
+    '#issue_custom_field_values_9': fieldSetStatus(['Testumgebung (Staging)', 'Produktivumgebung']),
+    '#issue_start_date': fieldSetCurrentDate,
+    '#issue_status_id': fieldSetStatus([2, 4]),
+  }
+
   const NEED_FEEDBACK_ACTIONS = {
     '#issue_assigned_to_id': (field, form) => form.querySelector('#issue_av_id')?.value,
     '#issue_start_date': fieldSetCurrentDate,
@@ -61,9 +71,10 @@
   }
 
   function injectAvSelect(form) {
+
     const assignedTo = form.querySelector('#issue_assigned_to_id');
-    if (!assignedTo || form.dataset.avSelectjected) return;
-    form.dataset.avSelectjected = 'true';
+
+    if (!assignedTo || form.querySelector('#issue_av_id')) return;
 
     const label = document.createElement('label');
     label.htmlFor = 'issue_av_id';
@@ -133,6 +144,16 @@
         actions: START_PROGRESS_ACTIONS,
       });
       injectAvSelect(form);
+    }
+
+    const newIssueForm = document.querySelector('form.new_issue#issue-form');
+    if (newIssueForm) {
+      injectActionButton(form, {
+        id: 'assign-to-me-btn',
+        label: 'Assign to me',
+        actions: ASSIGN_TO_ME_ACTIONS,
+      });
+      injectAvSelect(newIssueForm);
     }
   }
 
